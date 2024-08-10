@@ -235,6 +235,18 @@ def get_user_for_remote_user_header(
         user = octoprint.server.userManager.find_user(userid=header)
 
     if user:
+        groupHeader = request.headers.get(
+            settings().get(["accessControl", "remoteGroupsHeader"])
+        )
+        if groupHeader:
+            groups = groupHeader.split(",")
+            mapping = settings().get(["accessControl", "remoteGroupsMapping"])
+            if mapping:
+                assert isinstance(mapping, dict)
+                groups = [mapping.get(group, group) for group in groups]
+            octoprint.server.userManager.change_user_groups(header, groups)
+
+    if user:
         _flask.session["login_mechanism"] = LoginMechanism.REMOTE_USER
         _flask.session["credentials_seen"] = datetime.datetime.now().timestamp()
     return user

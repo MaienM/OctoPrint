@@ -1,7 +1,7 @@
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2022 The OctoPrint Project - Released under terms of the AGPLv3 License"
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from octoprint.schema import BaseModel
 from octoprint.vendor.with_attrs_docs import with_attrs_docs
@@ -50,6 +50,12 @@ class AccessControlConfig(BaseModel):
 
     remoteUserHeader: str = "REMOTE_USER"
     """Header used by the reverse proxy to convey the authenticated user."""
+
+    remoteGroupsHeader: str = "REMOTE_GROUPS"
+    """Header used by the reverse proxy to convey the authenticated user's groups."""
+
+    remoteGroupsMapping: Dict[str, str] = {}
+    """Mapping from groups in the header to groups in OctoPrint."""
 
     addRemoteUsers: bool = False
     """If a remote user is not found, add them. Use this only if all users from the remote system can use OctoPrint."""
