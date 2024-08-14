@@ -1574,14 +1574,17 @@ def get_flask_user_from_request(request):
 
     apikey = octoprint.server.util.get_api_key(request)
     if apikey is not None:
+        logging.getLogger().warn("get_flask_user_from_request A")
         # user from api key?
         user = octoprint.server.util.get_user_for_apikey(apikey)
 
     if user is None:
+        logging.getLogger().warn("get_flask_user_from_request B")
         # user still None -> current session user
         user = flask_login.current_user
 
     if user is None:
+        logging.getLogger().warn("get_flask_user_from_request C")
         # user still None -> anonymous
         from octoprint.server import userManager
 

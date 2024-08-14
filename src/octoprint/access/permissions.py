@@ -2,6 +2,7 @@ __author__ = "Marc Hannappel <salandora@gmail.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2017 The OctoPrint Project - Released under terms of the AGPLv3 License"
 
+import logging
 from collections import OrderedDict, defaultdict
 from functools import wraps
 
@@ -82,14 +83,18 @@ class OctoPrintPermission(Permission):
 
         :param identity: The identity
         """
+        logging.getLogger().warn(str(("OctoPrintPermission.allow", self, identity)))
         if self.needs and len(self.needs.intersection(identity.provides)) != len(
             self.needs
         ):
+            logging.getLogger().warn("OctoPrintPermission.allow result A")
             return False
 
         if self.excludes and self.excludes.intersection(identity.provides):
+            logging.getLogger().warn("OctoPrintPermission.allow result B")
             return False
 
+        logging.getLogger().warn("OctoPrintPermission.allow result C")
         return True
 
     def union(self, other):
@@ -163,6 +168,7 @@ class PluginIdentityContext:
     def can(self):
         """Whether the identity has access to the permission"""
         permission = getattr(Permissions, self.key)
+        logging.getLogger().warn(str(("PluginIdentityContext.can", self.key, permission)))
         if permission is None or isinstance(permission, PluginPermissionDecorator):
             raise UnknownPermission(self.key)
 
@@ -179,6 +185,9 @@ class PluginIdentityContext:
 
     def __enter__(self):
         permission = getattr(Permissions, self.key)
+        logging.getLogger().warn(
+            str(("PluginIdentityContext.__enter__", self.key, permission))
+        )
         if permission is None or isinstance(permission, PluginPermissionDecorator):
             raise UnknownPermission(self.key)
 

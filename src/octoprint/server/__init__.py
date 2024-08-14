@@ -198,6 +198,7 @@ def on_user_loaded_from_cookie(sender, user=None):
 
 
 def load_user(id):
+    logging.getLogger().warn(str(("load_user id", id)))
     if id is None:
         return None
 
@@ -223,12 +224,14 @@ def load_user(id):
     else:
         user = userManager.find_user(userid=id)
 
+    logging.getLogger().warn(str(("load_user user", user)))
     if (
         user
         and user.is_active
         and (not sessionid or validate_session_signature(sessionsig, id, sessionid))
     ):
         return user
+    logging.getLogger().warn("load_user none")
 
     return None
 
@@ -237,17 +240,20 @@ def load_user_from_request(request):
     # API key?
     apikey = util.get_api_key(request)
     if apikey:
+        logging.getLogger().warn("load_user_from_request A")
         user = util.get_user_for_apikey(apikey)
         if user:
             return user
 
     if settings().getBoolean(["accessControl", "trustBasicAuthentication"]):
+        logging.getLogger().warn("load_user_from_request B")
         # Basic Authentication?
         user = util.get_user_for_authorization_header(request)
         if user:
             return user
 
     if settings().getBoolean(["accessControl", "trustRemoteUser"]):
+        logging.getLogger().warn("load_user_from_request C")
         # Remote user header?
         user = util.get_user_for_remote_user_header(request)
         if user:

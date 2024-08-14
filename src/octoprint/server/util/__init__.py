@@ -187,11 +187,13 @@ def get_user_for_apikey(apikey: str) -> "Optional[octoprint.access.users.User]":
     """
     if apikey is not None:
         if apikey == settings().get(["api", "key"]):
+            logging.getLogger().warn("get_user_for_apikey A")
             # master key was used
             return octoprint.server.userManager.api_user_factory()
 
         user = octoprint.server.userManager.find_user(apikey=apikey)
         if user is not None:
+            logging.getLogger().warn("get_user_for_apikey B")
             # user key was used
             return user
 
@@ -200,6 +202,7 @@ def get_user_for_apikey(apikey: str) -> "Optional[octoprint.access.users.User]":
             try:
                 user = hook(apikey)
                 if user is not None:
+                    logging.getLogger().warn("get_user_for_apikey C")
                     return user
             except Exception:
                 logging.getLogger(__name__).exception(
@@ -208,6 +211,7 @@ def get_user_for_apikey(apikey: str) -> "Optional[octoprint.access.users.User]":
                     ),
                     extra={"plugin": name},
                 )
+    logging.getLogger().warn("get_user_for_apikey D")
     return None
 
 
@@ -244,6 +248,9 @@ def get_user_for_remote_user_header(
             if mapping:
                 assert isinstance(mapping, dict)
                 groups = [mapping.get(group, group) for group in groups]
+            logging.getLogger().warn(
+                "get_user_for_remote_user_header settings groups to", groups
+            )
             octoprint.server.userManager.change_user_groups(header, groups)
 
     if user:
@@ -320,8 +327,11 @@ def get_api_key(
         str: the API key, or None if not found
     """
 
+    logging.getLogger().warn(vars(request))
+
     # Check Flask GET/POST arguments
     if hasattr(request, "values") and "apikey" in request.values:
+        logging.getLogger().warn("get_api_key A")
         return request.values["apikey"]
 
     # Check Tornado GET/POST arguments
@@ -331,19 +341,23 @@ def get_api_key(
         and len(request.arguments["apikey"]) > 0
         and len(request.arguments["apikey"].strip()) > 0
     ):
+        logging.getLogger().warn("get_api_key B")
         return request.arguments["apikey"]
 
     # Check Tornado and Flask headers
     if "X-Api-Key" in request.headers:
+        logging.getLogger().warn("get_api_key C")
         return request.headers.get("X-Api-Key")
 
     # Check Tornado and Flask headers
     if "Authorization" in request.headers:
         header = request.headers.get("Authorization")
         if header.startswith("Bearer "):
+            logging.getLogger().warn("get_api_key D")
             token = header.replace("Bearer ", "", 1)
             return token
 
+    logging.getLogger().warn("get_api_key E")
     return None
 
 
